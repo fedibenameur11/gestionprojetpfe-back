@@ -1,0 +1,4 @@
+com\phegondev\usersmanagementsystem\config\CorsConfig$1.class
+com\phegondev\usersmanagementsystem\config\CorsConfig.class
+com\phegondev\usersmanagementsystem\config\JWTAuthFilter.class
+com\phegondev\usersmanagementsystem\UsersmanagementsystemApplication.class

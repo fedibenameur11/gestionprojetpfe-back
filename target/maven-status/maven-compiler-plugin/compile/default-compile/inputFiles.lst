@@ -1,0 +1,11 @@
+C:\Users\Asus\Desktop\users-management-system-master\springboot + angular\backend\src\main\java\com\phegondev\usersmanagementsystem\config\CorsConfig.java
+C:\Users\Asus\Desktop\users-management-system-master\springboot + angular\backend\src\main\java\com\phegondev\usersmanagementsystem\config\JWTAuthFilter.java
+C:\Users\Asus\Desktop\users-management-system-master\springboot + angular\backend\src\main\java\com\phegondev\usersmanagementsystem\config\SecurityConfig.java
+C:\Users\Asus\Desktop\users-management-system-master\springboot + angular\backend\src\main\java\com\phegondev\usersmanagementsystem\controller\UserManagementController.java
+C:\Users\Asus\Desktop\users-management-system-master\springboot + angular\backend\src\main\java\com\phegondev\usersmanagementsystem\dto\ReqRes.java
+C:\Users\Asus\Desktop\users-management-system-master\springboot + angular\backend\src\main\java\com\phegondev\usersmanagementsystem\entity\OurUsers.java
+C:\Users\Asus\Desktop\users-management-system-master\springboot + angular\backend\src\main\java\com\phegondev\usersmanagementsystem\repository\UsersRepo.java
+C:\Users\Asus\Desktop\users-management-system-master\springboot + angular\backend\src\main\java\com\phegondev\usersmanagementsystem\service\JWTUtils.java
+C:\Users\Asus\Desktop\users-management-system-master\springboot + angular\backend\src\main\java\com\phegondev\usersmanagementsystem\service\OurUserDetailsService.java
+C:\Users\Asus\Desktop\users-management-system-master\springboot + angular\backend\src\main\java\com\phegondev\usersmanagementsystem\service\UsersManagementService.java
+C:\Users\Asus\Desktop\users-management-system-master\springboot + angular\backend\src\main\java\com\phegondev\usersmanagementsystem\UsersmanagementsystemApplication.java
