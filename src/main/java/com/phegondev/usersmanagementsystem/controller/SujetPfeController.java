@@ -180,7 +180,7 @@ public ResponseEntity<Map<String, String>> uploadFile(@PathVariable Integer id, 
         // Sauvegarder les modifications dans la base de données
         sujetPfeService.ajouterSujet(sujetPfe);
 
-        response.put("message", "Fichier téléchargé et nom enregistré avec succès");
+        response.put("message", "Le rapport a été téléchargé avec succès");
         return ResponseEntity.ok(response);
     } catch (IOException e) {
         response.put("error", "Erreur lors du dépôt du fichier: " + e.getMessage());
