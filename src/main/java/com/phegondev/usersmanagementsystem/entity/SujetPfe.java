@@ -23,7 +23,7 @@ public class SujetPfe {
     @Enumerated(EnumType.STRING)
     private DemandeStatus demandeStatus; // PENDING, ACCEPTED, REJECTED
 
-    @JsonIgnore
+
     @ManyToOne
     private OurUsers moderator; // Le MODERATOR responsable du sujet
 
