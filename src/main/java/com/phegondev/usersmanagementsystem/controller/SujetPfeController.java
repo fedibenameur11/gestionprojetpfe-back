@@ -9,8 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/sujets")
@@ -20,6 +29,7 @@ public class SujetPfeController {
 
     @Autowired
     private SujetPfeService sujetPfeService;
+    private static final String UPLOAD_DIR = "uploads/";
 
     // Ajouter un sujet
     @PostMapping
@@ -134,6 +144,50 @@ public class SujetPfeController {
         List<SujetPfe> sujets = sujetPfeService.getSujetsNonPostules(userId);
         return ResponseEntity.ok(sujets);
     }
+/*
+    @PostMapping("/{id}/upload")
+    public ResponseEntity<String> uploadFile(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        try {
+            // Créer le dossier si nécessaire
+            Path path = Paths.get(UPLOAD_DIR + file.getOriginalFilename());
+            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+            return ResponseEntity.ok("File uploaded successfully");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading file: " + e.getMessage());
+        }
+    }
+*/
+@PostMapping("/{id}/upload")
+public ResponseEntity<Map<String, String>> uploadFile(@PathVariable Integer id, @RequestParam("file") MultipartFile file) {
+    Map<String, String> response = new HashMap<>();
+    try {
+        System.out.println("Nom du fichier reçu: " + file.getOriginalFilename()); // Log du nom du fichier
+
+        // Créer le dossier si nécessaire
+        Path path = Paths.get(UPLOAD_DIR + file.getOriginalFilename());
+        Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+        // Trouver le sujet par ID
+        SujetPfe sujetPfe = sujetPfeService.getSujetById(id);
+        if (sujetPfe == null) {
+            response.put("error", "Sujet non trouvé");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response); // Si le sujet n'existe pas
+        }
+
+        // Mettre à jour l'entité SujetPfe avec le nom du fichier téléchargé
+        sujetPfe.setRapport(file.getOriginalFilename());
+
+        // Sauvegarder les modifications dans la base de données
+        sujetPfeService.ajouterSujet(sujetPfe);
+
+        response.put("message", "Fichier téléchargé et nom enregistré avec succès");
+        return ResponseEntity.ok(response);
+    } catch (IOException e) {
+        response.put("error", "Erreur lors du dépôt du fichier: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+}
+
 
 
 

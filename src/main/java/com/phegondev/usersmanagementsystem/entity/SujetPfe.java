@@ -20,6 +20,7 @@ public class SujetPfe {
     private String description;
     private String technologie;
     private String image;
+    private String rapport;
     @Enumerated(EnumType.STRING)
     private DemandeStatus demandeStatus; // PENDING, ACCEPTED, REJECTED
 
