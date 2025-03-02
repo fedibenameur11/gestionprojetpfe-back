@@ -76,13 +76,10 @@ public class SujetPfeController {
             @PathVariable Integer sujetPfeId,
             @PathVariable Integer moderatorId) {
 
-        // Rechercher l'utilisateur avec son ID
         OurUsers moderator = ourUsersRepo.findById(moderatorId).orElse(null);
         if (moderator == null) {
-            return ResponseEntity.notFound().build(); // Si l'utilisateur n'existe pas
+            return ResponseEntity.notFound().build();
         }
-
-        // Appel du service pour affecter le modérateur
         SujetPfe sujetPfe = sujetPfeService.affecterModerateur(sujetPfeId, moderator);
 
         if (sujetPfe != null) {
@@ -144,51 +141,29 @@ public class SujetPfeController {
         List<SujetPfe> sujets = sujetPfeService.getSujetsNonPostules(userId);
         return ResponseEntity.ok(sujets);
     }
-/*
     @PostMapping("/{id}/upload")
-    public ResponseEntity<String> uploadFile(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, String>> uploadFile(@PathVariable Integer id, @RequestParam("file") MultipartFile file) {
+        Map<String, String> response = new HashMap<>();
         try {
+            System.out.println("Nom du fichier reçu: " + file.getOriginalFilename()); // Log du nom du fichier
+
             // Créer le dossier si nécessaire
             Path path = Paths.get(UPLOAD_DIR + file.getOriginalFilename());
             Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-            return ResponseEntity.ok("File uploaded successfully");
+
+            SujetPfe sujetPfe = sujetPfeService.getSujetById(id);
+            if (sujetPfe == null) {
+                response.put("error", "Sujet non trouvé");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response); // Si le sujet n'existe pas
+            }
+            sujetPfe.setRapport(file.getOriginalFilename());
+            sujetPfeService.ajouterSujet(sujetPfe);
+
+            response.put("message", "Le rapport a été téléchargé avec succès");
+            return ResponseEntity.ok(response);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading file: " + e.getMessage());
+            response.put("error", "Erreur lors du dépôt du fichier: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-*/
-@PostMapping("/{id}/upload")
-public ResponseEntity<Map<String, String>> uploadFile(@PathVariable Integer id, @RequestParam("file") MultipartFile file) {
-    Map<String, String> response = new HashMap<>();
-    try {
-        System.out.println("Nom du fichier reçu: " + file.getOriginalFilename()); // Log du nom du fichier
-
-        // Créer le dossier si nécessaire
-        Path path = Paths.get(UPLOAD_DIR + file.getOriginalFilename());
-        Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-
-        // Trouver le sujet par ID
-        SujetPfe sujetPfe = sujetPfeService.getSujetById(id);
-        if (sujetPfe == null) {
-            response.put("error", "Sujet non trouvé");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response); // Si le sujet n'existe pas
-        }
-
-        // Mettre à jour l'entité SujetPfe avec le nom du fichier téléchargé
-        sujetPfe.setRapport(file.getOriginalFilename());
-
-        // Sauvegarder les modifications dans la base de données
-        sujetPfeService.ajouterSujet(sujetPfe);
-
-        response.put("message", "Le rapport a été téléchargé avec succès");
-        return ResponseEntity.ok(response);
-    } catch (IOException e) {
-        response.put("error", "Erreur lors du dépôt du fichier: " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
-}
-
-
-
-
 }

@@ -22,18 +22,18 @@ public class SujetPfe {
     private String image;
     private String rapport;
     @Enumerated(EnumType.STRING)
-    private DemandeStatus demandeStatus; // PENDING, ACCEPTED, REJECTED
+    private DemandeStatus demandeStatus;
 
 
     @ManyToOne
-    private OurUsers moderator; // Le MODERATOR responsable du sujet
+    private OurUsers moderator;
 
     @JsonIgnore
     @ManyToOne
-    private OurUsers userAttribue; // L'utilisateur attribué au sujet
+    private OurUsers userAttribue;
     @JsonIgnore
-    @ManyToMany() // mappedBy fait référence à la variable dans l'entité `OurUsers`
-    private List<OurUsers> demandeurs; // Liste des demandeurs
+    @ManyToMany()
+    private List<OurUsers> demandeurs;
 
 
 }
