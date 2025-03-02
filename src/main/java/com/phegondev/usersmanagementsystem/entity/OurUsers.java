@@ -30,7 +30,6 @@ public class OurUsers implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private UserStatus status = UserStatus.PENDING; // Par défaut, un MODERATOR est "PENDING"
-////Ajouté par moii
     @JsonIgnore
     @OneToMany(mappedBy = "moderator")
     private List<SujetPfe> moderatedSujets; // Liste des sujets PFE dont l'utilisateur est le MODERATOR
@@ -41,6 +40,7 @@ public class OurUsers implements UserDetails {
     @ManyToMany(mappedBy = "demandeurs")
     private List<SujetPfe> sujetsPostules; // Liste des sujets postulés par l'utilisateur
 //
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
