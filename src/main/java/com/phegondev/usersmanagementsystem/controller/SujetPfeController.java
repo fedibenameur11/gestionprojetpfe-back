@@ -3,6 +3,7 @@ package com.phegondev.usersmanagementsystem.controller;
 import com.phegondev.usersmanagementsystem.entity.OurUsers;
 import com.phegondev.usersmanagementsystem.entity.SujetPfe;
 import com.phegondev.usersmanagementsystem.repository.UsersRepo;
+import com.phegondev.usersmanagementsystem.service.EmailService;
 import com.phegondev.usersmanagementsystem.service.SujetPfeService;
 import com.phegondev.usersmanagementsystem.service.UsersManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ public class SujetPfeController {
 
     @Autowired
     private SujetPfeService sujetPfeService;
+    @Autowired
+    private EmailService emailService;
     private static final String UPLOAD_DIR = "uploads/";
 
     // Ajouter un sujet
@@ -97,7 +100,7 @@ public class SujetPfeController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);  // Si la postulation échoue
         }
     }
-    @PutMapping("/accepter/{sujetPfeId}/{userId}")
+    /*@PutMapping("/accepter/{sujetPfeId}/{userId}")
     public ResponseEntity<SujetPfe> accepterPostulation(@PathVariable Integer sujetPfeId, @PathVariable Integer userId) {
         SujetPfe sujetPfe = sujetPfeService.accepterPostulation(sujetPfeId, userId);
         if (sujetPfe != null) {
@@ -105,8 +108,7 @@ public class SujetPfeController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);  // Si le sujet ou l'utilisateur n'existe pas
         }
-    }
-
+    }*/
     @PutMapping("/refuser/{sujetPfeId}/{userId}")
     public ResponseEntity<SujetPfe> refuserPostulation(@PathVariable Integer sujetPfeId, @PathVariable Integer userId) {
         SujetPfe sujetPfe = sujetPfeService.refuserPostulation(sujetPfeId, userId);
@@ -115,6 +117,29 @@ public class SujetPfeController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);  // Si le sujet ou l'utilisateur n'existe pas
         }
+    }
+
+    @PutMapping("/accepter/{sujetPfeId}/{userId}")
+    public ResponseEntity<?> accepterPostulation(@PathVariable Integer sujetPfeId,
+                                                 @PathVariable Integer userId) {
+        System.out.println("📩 Appel API: accepterPostulation - Sujet ID: " + sujetPfeId + ", Utilisateur ID: " + userId);
+
+        SujetPfe updatedSujet = sujetPfeService.accepterPostulation(sujetPfeId, userId);
+
+        if (updatedSujet == null) {
+            System.out.println("❌ Aucun sujet mis à jour, retour 404");
+            return ResponseEntity.status(404).body("Postulation non acceptée: Sujet ou utilisateur invalide.");
+        }
+
+        // Envoi de l'email si l'utilisateur est bien attribué
+        if (updatedSujet.getUserAttribue() != null) {
+            String emailReceiver = updatedSujet.getUserAttribue().getEmail();
+            System.out.println("📧 Envoi de l'email à " + emailReceiver);
+            emailService.sendEmail(emailReceiver, "Votre postulation a été acceptée",
+                    "Félicitations ! Votre postulation pour le sujet '" + updatedSujet.getTitre() + "' a été acceptée.");
+        }
+
+        return ResponseEntity.ok(updatedSujet);
     }
 
     @GetMapping("/demandeurs/{sujetPfeId}")
@@ -166,4 +191,10 @@ public class SujetPfeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @GetMapping("/moderateur/{moderatorId}")
+    public List<SujetPfe> getSujetsAffectesModerateur(@PathVariable Integer moderatorId) {
+        return sujetPfeService.getSujetsAffectesModerateur(moderatorId);
+    }
+
 }

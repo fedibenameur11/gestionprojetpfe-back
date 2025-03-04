@@ -5,6 +5,7 @@ import com.phegondev.usersmanagementsystem.entity.OurUsers;
 import com.phegondev.usersmanagementsystem.entity.SujetPfe;
 import com.phegondev.usersmanagementsystem.repository.SujetPfeRepo;
 import com.phegondev.usersmanagementsystem.repository.UsersRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,10 @@ public class SujetPfeService implements ISujetPfeService {
     private SujetPfeRepo sujetPfeRepository;
     @Autowired
     private UsersRepo userRepository;
+
+    @Autowired
+    private EmailService emailService;  // Inject Email Service
+
     @Override
     public SujetPfe ajouterSujet(SujetPfe sujetPfe) {
         return sujetPfeRepository.save(sujetPfe);
@@ -62,27 +67,53 @@ public class SujetPfeService implements ISujetPfeService {
         SujetPfe sujetPfe = sujetPfeRepository.findById(sujetPfeId).orElse(null);
         OurUsers user = userRepository.findById(userId).orElse(null);
 
-        if (sujetPfe != null && user != null) {
-            sujetPfe.getDemandeurs().add(user);  // Ajoute le demandeur
-            sujetPfe.setDemandeStatus(DemandeStatus.PENDING);  // Le statut devient PENDING
-            return sujetPfeRepository.save(sujetPfe);
+        if (sujetPfe == null || user == null) {
+            return null; // Retourner null si le sujet ou l'utilisateur n'existe pas
         }
-        return null;
+
+        // Vérifier si l'utilisateur a déjà postulé à ce sujet
+        if (sujetPfe.getDemandeurs().contains(user)) {
+            throw new IllegalStateException("Vous avez déjà postulé à ce sujet.");
+        }
+
+        sujetPfe.getDemandeurs().add(user); // Ajoute le demandeur
+        sujetPfe.setDemandeStatus(DemandeStatus.PENDING); // Met à jour le statut
+        return sujetPfeRepository.save(sujetPfe);
     }
 
+    @Transactional
     public SujetPfe accepterPostulation(Integer sujetPfeId, Integer userId) {
-        SujetPfe sujetPfe = sujetPfeRepository.findById(sujetPfeId).orElse(null);
-        OurUsers user = userRepository.findById(userId).orElse(null);
+        System.out.println("🔍 Recherche du sujet ID: " + sujetPfeId);
+        Optional<SujetPfe> optionalSujetPfe = sujetPfeRepository.findById(sujetPfeId);
+        Optional<OurUsers> optionalUser = userRepository.findById(userId);
 
-        if (sujetPfe != null && user != null && sujetPfe.getDemandeurs().contains(user)) {
-            // Change le statut du sujet à ACCEPTED et met à jour l'utilisateur attribué
-            sujetPfe.setDemandeStatus(DemandeStatus.ACCEPTED);
-            sujetPfe.setUserAttribue(user);  // Affecte le seul utilisateur accepté
-            return sujetPfeRepository.save(sujetPfe);
+        if (optionalSujetPfe.isEmpty()) {
+            System.out.println("❌ Sujet non trouvé !");
+            return null;
         }
-        return null;
-    }
+        if (optionalUser.isEmpty()) {
+            System.out.println("❌ Utilisateur non trouvé !");
+            return null;
+        }
 
+        SujetPfe sujetPfe = optionalSujetPfe.get();
+        OurUsers user = optionalUser.get();
+
+        // Vérifie si l'utilisateur a bien postulé
+        if (!sujetPfe.getDemandeurs().contains(user)) {
+            System.out.println("❌ L'utilisateur " + userId + " n'a pas postulé pour ce sujet !");
+            return null;
+        }
+
+        // Mettre à jour l'utilisateur attribué et le statut
+        sujetPfe.setDemandeStatus(DemandeStatus.ACCEPTED);
+        sujetPfe.setUserAttribue(user);
+        sujetPfe.getDemandeurs().remove(user);
+
+        SujetPfe updatedSujet = sujetPfeRepository.save(sujetPfe);
+        System.out.println("✅ Postulation acceptée pour : " + updatedSujet.getTitre());
+        return updatedSujet;
+    }
     public SujetPfe refuserPostulation(Integer sujetPfeId, Integer userId) {
         SujetPfe sujetPfe = sujetPfeRepository.findById(sujetPfeId).orElse(null);
         OurUsers user = userRepository.findById(userId).orElse(null);
@@ -136,8 +167,15 @@ public class SujetPfeService implements ISujetPfeService {
     public List<SujetPfe> getSujetsNonPostules(Integer userId) {
         return sujetPfeRepository.findAll().stream()
                 .filter(sujet -> sujet.getDemandeurs().stream().noneMatch(user -> user.getId().equals(userId)))
+                .filter(sujet -> sujet.getUserAttribue() == null) // Vérifie que personne n'a été attribué
                 .collect(Collectors.toList());
     }
+
+
+    public List<SujetPfe> getSujetsAffectesModerateur(Integer moderatorId) {
+        return sujetPfeRepository.findByModeratorId(moderatorId);
+    }
+
 
 
 }

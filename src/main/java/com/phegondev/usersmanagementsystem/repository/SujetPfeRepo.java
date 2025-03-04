@@ -10,4 +10,5 @@ import java.util.List;
 public interface SujetPfeRepo extends JpaRepository<SujetPfe, Integer> {
     List<SujetPfe> findByUserAttribueId(Integer userId);
     List<SujetPfe> findByDemandeurs_Id(Integer userId);
+    List<SujetPfe> findByModeratorId(Integer moderatorId);
 }
