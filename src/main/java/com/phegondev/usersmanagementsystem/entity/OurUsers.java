@@ -34,8 +34,8 @@ public class OurUsers implements UserDetails {
     @OneToMany(mappedBy = "moderator")
     private List<SujetPfe> moderatedSujets; // Liste des sujets PFE dont l'utilisateur est le MODERATOR
     @JsonIgnore
-    @OneToMany(mappedBy = "userAttribue")
-    private List<SujetPfe> attributedSujets; // Liste des sujets PFE attribués à l'utilisateur
+    @OneToOne(mappedBy = "userAttribue")
+    private SujetPfe attributedSujet; // Liste des sujets PFE attribués à l'utilisateur
     @JsonIgnore
     @ManyToMany(mappedBy = "demandeurs")
     private List<SujetPfe> sujetsPostules; // Liste des sujets postulés par l'utilisateur

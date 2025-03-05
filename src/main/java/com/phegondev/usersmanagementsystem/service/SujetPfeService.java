@@ -27,8 +27,6 @@ public class SujetPfeService implements ISujetPfeService {
     @Autowired
     private UsersRepo userRepository;
 
-    @Autowired
-    private EmailService emailService;  // Inject Email Service
 
     @Override
     public SujetPfe ajouterSujet(SujetPfe sujetPfe) {

@@ -29,7 +29,7 @@ public class SujetPfe {
     private OurUsers moderator;
 
     @JsonIgnore
-    @ManyToOne
+    @OneToOne
     private OurUsers userAttribue;
     @JsonIgnore
     @ManyToMany()
